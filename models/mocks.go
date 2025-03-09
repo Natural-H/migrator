@@ -222,8 +222,9 @@ func MockDB(db *gorm.DB) {
 
 	db.Create(&libros)
 
-	const registers = 15000
-	const prestamos = 100000
+	const registers = 100
+	const prestamos = 1500
+
 	var users [registers]*Usuarios
 	var lends [prestamos]*Prestamos
 

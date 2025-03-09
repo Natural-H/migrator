@@ -2,7 +2,7 @@ package models
 
 type Libros struct {
 	LibroID         uint   `gorm:"primaryKey"`
-	Titulo          string `gorm:"not null;index;size:128"`
+	Titulo          string `gorm:"not null;index;size:128;unique"`
 	AnioPublicacion string `gorm:"not null;index"`
 	EditorialID     uint   `gorm:"not null;index"`
 	Editorial       *Editoriales
