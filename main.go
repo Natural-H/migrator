@@ -25,7 +25,7 @@ func main() {
 	port := flag.Int("port", 3306, "Database port")
 	user := flag.String("user", "root", "Database user")
 	password := flag.String("password", "", "Database password")
-	database := flag.String("database", "biblioteca-test", "Database name")
+	database := flag.String("database", "biblioteca", "Database name")
 	mockdata := flag.Bool("mockdata", false, "Use mocked data")
 	flag.Parse()
 
