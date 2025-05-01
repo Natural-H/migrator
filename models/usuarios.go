@@ -6,5 +6,6 @@ type Usuarios struct {
 	Nombre        string       `gorm:"not null;size:128"`
 	Email         string       `gorm:"unique;not null;size:128"`
 	Contrasenia   string       `gorm:"not null;size:128"`
+	AvatarURL     *string      `gorm:"size:500"`
 	Prestamos     []*Prestamos `gorm:"foreignKey:UsuarioID"`
 }

@@ -1,10 +1,15 @@
 package models
 
 import (
+	"bufio"
+	"fmt"
 	"github.com/go-faker/faker/v4"
 	"github.com/go-faker/faker/v4/pkg/options"
 	"gorm.io/gorm"
+	"log"
 	"math/rand"
+	"os"
+	"strings"
 	"time"
 )
 
@@ -222,11 +227,33 @@ func MockDB(db *gorm.DB) {
 
 	db.Create(&libros)
 
-	const registers = 100
-	const prestamos = 1500
+	var registers = 100
+	var prestamos = 1500
 
-	var users [registers]*Usuarios
-	var lends [prestamos]*Prestamos
+	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Print("Enter how many Users will be created (default: 100)> ")
+	input, _ := reader.ReadString('\n')
+	input = strings.TrimSpace(input)
+	if input != "" {
+		_, err := fmt.Sscanf(input, "%d", &registers)
+		if err != nil {
+			log.Fatalf("Error user count: %s", err)
+		}
+	}
+
+	fmt.Print("Enter how many Lends (Préstamos) will be created (default: 1500)> ")
+	input, _ = reader.ReadString('\n')
+	input = strings.TrimSpace(input)
+	if input != "" {
+		_, err := fmt.Sscanf(input, "%d", &registers)
+		if err != nil {
+			log.Fatalf("Error lend count: %s", err)
+		}
+	}
+
+	users := make([]*Usuarios, registers)
+	lends := make([]*Prestamos, prestamos)
 
 	for i := 0; i < registers; i++ {
 		users[i] = &Usuarios{
@@ -237,21 +264,21 @@ func MockDB(db *gorm.DB) {
 		}
 	}
 
-	db.CreateInBatches(&users, min(registers/10, 30))
+	db.CreateInBatches(&users, 30)
 
 	for i := 0; i < prestamos; i++ {
 		lendDate := RandomTimeBetweenSixMonths()
 		returnDate := lendDate.AddDate(0, 1, 0)
 
 		lends[i] = &Prestamos{
-			Usuario:         users[rand.Uint64()%registers],
+			Usuario:         users[rand.Uint64()%uint64(registers)],
 			Libro:           libros[rand.Uint64()%uint64(len(libros))],
 			FechaPrestamo:   &lendDate,
 			FechaDevolucion: &returnDate,
 		}
 	}
 
-	db.CreateInBatches(&lends, min(prestamos/30, 30))
+	db.CreateInBatches(&lends, 50)
 }
 
 func RandomTimeBetweenSixMonths() time.Time {

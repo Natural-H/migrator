@@ -1,46 +1,50 @@
 package main
 
 import (
+	"dummyMigration/InitUtils"
 	"dummyMigration/models"
 	"flag"
 	"fmt"
+	"github.com/eiannone/keyboard"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 	"log"
 )
 
-type DatabaseCredentials struct {
-	Host                           string `json:"host"`
-	Port                           int    `json:"port"`
-	User                           string `json:"user"`
-	Password                       string `json:"password"`
-	DBName                         string `json:"dbName"`
-	DontGeneratePreparedStatements bool
-	SkipDefaultTransaction         bool
+func createAndWriteCredentialsFile() InitUtils.DatabaseCredentials {
+	credentials := InitUtils.CreateCredentials()
+
+	fmt.Printf("This credentials will be written to credentials.json (WARN: Password is in plain text)")
+	err := InitUtils.WriteCredentialsToFile("./credentials.json", credentials)
+	if err != nil {
+		log.Fatalf("Error writing credentials to file: %v", err)
+	}
+
+	return credentials
 }
 
 func main() {
-	host := flag.String("host", "localhost", "Database host")
-	port := flag.Int("port", 3306, "Database port")
-	user := flag.String("user", "root", "Database user")
-	password := flag.String("password", "", "Database password")
-	database := flag.String("database", "biblioteca", "Database name")
-	mockdata := flag.Bool("mockdata", false, "Use mocked data")
+	reset := flag.Bool("reset", false, "Reset the database credentials")
 	flag.Parse()
 
-	credentials := DatabaseCredentials{
-		Host:                           *host,
-		Port:                           *port,
-		User:                           *user,
-		Password:                       *password,
-		DBName:                         *database,
-		SkipDefaultTransaction:         false,
-		DontGeneratePreparedStatements: true,
+	var credentials, err = InitUtils.ReadCredentialsFromFile("./credentials.json")
+
+	if err != nil {
+		fmt.Println("Error reading credentials from file, initializing new credentials...")
+		credentials = createAndWriteCredentialsFile()
+	} else {
+		if *reset {
+			fmt.Println("Resetting credentials...")
+			credentials = createAndWriteCredentialsFile()
+		} else {
+			fmt.Println("Credentials loaded from file.")
+		}
 	}
 
+	_, _, _ = keyboard.GetKey()
+
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", credentials.User, credentials.Password, credentials.Host, credentials.Port, credentials.DBName)
-	var err error
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
@@ -73,9 +77,19 @@ func main() {
 		return
 	}
 
-	if *mockdata {
-		models.MockDB(db)
+	fmt.Println("Database migrated successfully.\nNow Mocking data...")
+
+	models.MockDB(db)
+
+	fmt.Println("Done!\nPress any key to continue...")
+
+	if err := keyboard.Open(); err != nil {
+		panic(err)
 	}
+	defer keyboard.Close()
+
+	_, _, _ = keyboard.GetKey()
+	fmt.Println("Key pressed, continuing...")
 }
 
 func DropAllTables(db *gorm.DB) error {
