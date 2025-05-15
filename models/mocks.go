@@ -1,19 +1,14 @@
 package models
 
 import (
-	"bufio"
-	"fmt"
 	"github.com/go-faker/faker/v4"
 	"github.com/go-faker/faker/v4/pkg/options"
 	"gorm.io/gorm"
-	"log"
 	"math/rand"
-	"os"
-	"strings"
 	"time"
 )
 
-func MockDB(db *gorm.DB) {
+func MockDB(db *gorm.DB, registers int, prestamos int) {
 	autores := []*Autores{
 		{Nombre: "George Orwell"},
 		{Nombre: "J.K. Rowling"},
@@ -226,31 +221,6 @@ func MockDB(db *gorm.DB) {
 	}
 
 	db.Create(&libros)
-
-	var registers = 100
-	var prestamos = 1500
-
-	reader := bufio.NewReader(os.Stdin)
-
-	fmt.Print("Enter how many Users will be created (default: 100)> ")
-	input, _ := reader.ReadString('\n')
-	input = strings.TrimSpace(input)
-	if input != "" {
-		_, err := fmt.Sscanf(input, "%d", &registers)
-		if err != nil {
-			log.Fatalf("Error user count: %s", err)
-		}
-	}
-
-	fmt.Print("Enter how many Lends (Préstamos) will be created (default: 1500)> ")
-	input, _ = reader.ReadString('\n')
-	input = strings.TrimSpace(input)
-	if input != "" {
-		_, err := fmt.Sscanf(input, "%d", &registers)
-		if err != nil {
-			log.Fatalf("Error lend count: %s", err)
-		}
-	}
 
 	users := make([]*Usuarios, registers)
 	lends := make([]*Prestamos, prestamos)

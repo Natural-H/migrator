@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"dummyMigration/InitUtils"
 	"dummyMigration/models"
 	"flag"
@@ -10,6 +11,8 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 	"log"
+	"os"
+	"strings"
 )
 
 func createAndWriteCredentialsFile() InitUtils.DatabaseCredentials {
@@ -79,7 +82,32 @@ func main() {
 
 	fmt.Println("Database migrated successfully.\nNow Mocking data...")
 
-	models.MockDB(db)
+	var registers = 100
+	var prestamos = 1500
+
+	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Print("Enter how many Users will be created (default: 100)> ")
+	input, _ := reader.ReadString('\n')
+	input = strings.TrimSpace(input)
+	if input != "" {
+		_, err := fmt.Sscanf(input, "%d", &registers)
+		if err != nil {
+			log.Fatalf("Error user count: %s", err)
+		}
+	}
+
+	fmt.Print("Enter how many Lends (Préstamos) will be created (default: 1500)> ")
+	input, _ = reader.ReadString('\n')
+	input = strings.TrimSpace(input)
+	if input != "" {
+		_, err := fmt.Sscanf(input, "%d", &registers)
+		if err != nil {
+			log.Fatalf("Error lend count: %s", err)
+		}
+	}
+
+	models.MockDB(db, registers, prestamos)
 
 	fmt.Println("Done!\nPress any key to continue...")
 
