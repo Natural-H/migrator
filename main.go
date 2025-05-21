@@ -87,7 +87,7 @@ func main() {
 
 	reader := bufio.NewReader(os.Stdin)
 
-	fmt.Print("Enter how many Users will be created (default: 100)> ")
+	fmt.Print("Enter how many Users (Usuarios) will be created (default: 100)> ")
 	input, _ := reader.ReadString('\n')
 	input = strings.TrimSpace(input)
 	if input != "" {
@@ -117,7 +117,6 @@ func main() {
 	defer keyboard.Close()
 
 	_, _, _ = keyboard.GetKey()
-	fmt.Println("Key pressed, continuing...")
 }
 
 func DropAllTables(db *gorm.DB) error {
