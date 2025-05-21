@@ -55,6 +55,28 @@ func WriteCredentialsToFile(filePath string, credentials DatabaseCredentials) er
 	return encoder.Encode(credentials)
 }
 
+type UserPassword struct {
+	Email    string
+	Password string
+}
+
+func WriteUsersAndPasswords(filePath string, users []UserPassword) error {
+	file, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			log.Fatalf("failed to close file: %v", err)
+		}
+	}(file)
+
+	encoder := json.NewEncoder(file)
+	encoder.SetIndent("", "  ") // Optional: Pretty-print JSON
+	return encoder.Encode(users)
+}
+
 func CreateCredentials() DatabaseCredentials {
 	credentials := &DatabaseCredentials{
 		Host:   "localhost",

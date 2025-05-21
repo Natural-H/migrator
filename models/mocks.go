@@ -1,8 +1,11 @@
 package models
 
 import (
+	"dummyMigration/InitUtils"
+	"fmt"
 	"github.com/go-faker/faker/v4"
 	"github.com/go-faker/faker/v4/pkg/options"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"math/rand"
 	"time"
@@ -224,6 +227,7 @@ func MockDB(db *gorm.DB, registers int, prestamos int) {
 
 	users := make([]*Usuarios, registers)
 	lends := make([]*Prestamos, prestamos)
+	regs := make([]InitUtils.UserPassword, registers)
 
 	for i := 0; i < registers; i++ {
 		users[i] = &Usuarios{
@@ -232,6 +236,24 @@ func MockDB(db *gorm.DB, registers int, prestamos int) {
 			Email:         faker.Email(options.WithCustomDomain("fake.com")),
 			Contrasenia:   faker.Password(),
 		}
+
+		regs[i] = InitUtils.UserPassword{
+			Email:    users[i].Email,
+			Password: users[i].Contrasenia,
+		}
+
+		var err error
+		users[i].Contrasenia, err = HashPassword(users[i].Contrasenia)
+
+		if err != nil {
+			fmt.Printf("Error hashing password: %s\n", err)
+			return
+		}
+	}
+
+	err := InitUtils.WriteUsersAndPasswords("./users.json", regs)
+	if err != nil {
+		fmt.Printf("Error writing users to file: %s\nWARN: All users may be innacessible due encryption", err)
 	}
 
 	db.CreateInBatches(&users, 30)
@@ -269,4 +291,9 @@ func RandomTimeBetweenSixMonths() time.Time {
 	randomTime := sixMonthsAgo.Add(time.Duration(randomSeconds) * time.Second)
 
 	return randomTime
+}
+
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	return string(bytes), err
 }
