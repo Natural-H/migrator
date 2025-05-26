@@ -31,10 +31,11 @@ func main() {
 	reset := flag.Bool("reset", false, "Reset the database credentials")
 	flag.Parse()
 
+	fmt.Println("Trying to read credentials from file...")
 	var credentials, err = InitUtils.ReadCredentialsFromFile("./credentials.json")
 
 	if err != nil {
-		fmt.Println("Error reading credentials from file, initializing new credentials...")
+		fmt.Println("Couldn't read credentials from file, initializing new credentials...")
 		credentials = createAndWriteCredentialsFile()
 	} else {
 		if *reset {
@@ -80,12 +81,41 @@ func main() {
 		return
 	}
 
-	fmt.Println("Database migrated successfully.\nNow Mocking data...")
+	if err := keyboard.Open(); err != nil {
+		panic(err)
+	}
+	defer func() {
+		err := keyboard.Close()
+		if err != nil {
+			log.Fatalf("failed to close keyboard: %v", err)
+		}
+	}()
 
+	fmt.Println("Database migrated successfully.\nMock data? (Y/n)")
+	key := "y"
+	reader := bufio.NewReader(os.Stdin)
+	input, _ := reader.ReadString('\n')
+	input = strings.TrimSpace(input)
+	if input != "" {
+		key = input
+	}
+
+	//_, key, _ := keyboard.GetKey()
+
+	if key == "y" || key == "Y" {
+		MockData(db, reader)
+	} else {
+		fmt.Println("Skipping mock data generation...")
+	}
+
+	fmt.Println("Done!\nPress any key to continue...")
+
+	_, _, _ = keyboard.GetKey()
+}
+
+func MockData(db *gorm.DB, reader *bufio.Reader) {
 	var registers = 100
 	var prestamos = 1500
-
-	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Print("Enter how many Users (Usuarios) will be created (default: 100)> ")
 	input, _ := reader.ReadString('\n')
@@ -107,16 +137,8 @@ func main() {
 		}
 	}
 
+	fmt.Println("Generating mock data...")
 	models.MockDB(db, registers, prestamos)
-
-	fmt.Println("Done!\nPress any key to continue...")
-
-	if err := keyboard.Open(); err != nil {
-		panic(err)
-	}
-	defer keyboard.Close()
-
-	_, _, _ = keyboard.GetKey()
 }
 
 func DropAllTables(db *gorm.DB) error {
