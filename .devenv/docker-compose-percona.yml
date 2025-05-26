@@ -1,0 +1,23 @@
+services:
+  mysql:
+    image: percona/percona-server:8.0
+    container_name: percona-server
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: biblioteca_test
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+    volumes:
+      - percona-data:/var/lib/mysql              # Database data
+      - percona-logs:/var/log/mysql              # MySQL logs
+      - percona-backups:/backups                 # XtraBackup output (optional, for future use)
+    restart: unless-stopped
+
+volumes:
+  percona-data:
+  percona-logs:
+  percona-backups:
+
+# DOCS: https://docs.percona.com/percona-server/8.0/audit-log-plugin.html#audit-log-events
