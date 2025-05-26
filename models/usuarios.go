@@ -8,4 +8,6 @@ type Usuarios struct {
 	Contrasenia   string       `gorm:"not null;size:128"`
 	AvatarURL     *string      `gorm:"size:500"`
 	Prestamos     []*Prestamos `gorm:"foreignKey:UsuarioID"`
+	RolID         uint         `gorm:"not null;default:1"` // 1 = Usuario, 2 = Administrador
+	Rol           *Roles
 }

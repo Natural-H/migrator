@@ -10,4 +10,5 @@ type Prestamos struct {
 	Libro           *Libros
 	FechaPrestamo   *time.Time `gorm:"not null"`
 	FechaDevolucion *time.Time
+	Devuelto        bool `gorm:"not null;default:false"`
 }

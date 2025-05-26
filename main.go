@@ -68,6 +68,7 @@ func main() {
 
 	err = db.AutoMigrate(
 		models.Libros{},
+		models.Roles{},
 		models.Usuarios{},
 		models.Prestamos{},
 		models.Autores{},
@@ -80,6 +81,8 @@ func main() {
 		log.Fatalf("error: %v", err)
 		return
 	}
+
+	db.Create(&models.Rols)
 
 	if err := keyboard.Open(); err != nil {
 		panic(err)
