@@ -225,7 +225,23 @@ func MockDB(db *gorm.DB, registers int, prestamos int) {
 	users := make([]*Usuarios, registers)
 	lends := make([]*Prestamos, prestamos)
 
-	for i := 0; i < registers; i++ {
+	users[0] = &Usuarios{
+		NombreUsuario: "user",
+		Nombre:        "User User",
+		Email:         "user@example.com",
+		Contrasenia:   "user",
+		RolID:         1,
+	}
+
+	users[1] = &Usuarios{
+		NombreUsuario: "admin",
+		Nombre:        "Admin Admin",
+		Email:         "admin@example.com",
+		Contrasenia:   "admin",
+		RolID:         2,
+	}
+
+	for i := 2; i < registers; i++ {
 		users[i] = &Usuarios{
 			NombreUsuario: faker.Username(options.WithRandomStringLength(20)),
 			Nombre:        faker.Name(),
